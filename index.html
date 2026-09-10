@@ -123,7 +123,7 @@
           </div>
         </div>
 
-        <!-- Panel Kalkulator (Selalu Terbuka & Aktif Sejak Awal) -->
+        <!-- Panel Kalkulator -->
         <div class="p-4 rounded-2xl bg-slate-950/50 border border-slate-800/70 space-y-2.5 text-xs">
           <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Detail Kalkulasi</div>
           <div class="flex justify-between items-center text-slate-400">
@@ -145,7 +145,8 @@
           </div>
         </div>
 
-        <div id="logProses" class="text-xs text-center font-mono py-1 text-amber-400 min-h-[20px]"></div>
+        <!-- Log Status: Realtime Hidup & Mati -->
+        <div id="logProses" class="text-xs text-center font-mono py-1 min-h-[22px]"></div>
 
         <button 
           id="btnSetor" 
@@ -173,7 +174,7 @@
   </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwnYguGJ1UTSElXygFEeUuhF1Vcs-GI8mtLgqKGhve3RrwMGnf0mtlPLoEIo0vn7XU0bA/exec"; 
+    const API_URL = "https://script.google.com/macros/library/d/1EmnO_dCN64M_MYcMN12gj2qjO0y-rjKviBLJ4t2heP5By8IhKrMdYocg/22"; 
     let area = document.getElementById('dataAkun');
     let btn = document.getElementById('btnSetor');
     let logTxt = document.getElementById('logProses');
@@ -186,11 +187,9 @@
     function hitungLive() {
       let baris = area.value.split('\n');
       let jmlForm = 0;
-      for(let i=0; i<baris.length; i++) if(baris[i].trim() !== "") jmlForm++;
+      for(let i = 0; i < baris.length; i++) if(baris[i].trim() !== "") jmlForm++;
       
       let totalAkumulasi = akunHariIni + jmlForm;
-      
-      // Tier: >=100 dapat 900, >=50 dapat 800, di bawah itu tetap dapat rate awal 700
       let hrgPerAkun = totalAkumulasi >= 100 ? 900 : (totalAkumulasi >= 50 ? 800 : 700);
       totalHargaKirim = jmlForm * hrgPerAkun;
       
@@ -207,9 +206,8 @@
           document.getElementById('dashJmlHariIni').innerText = akunHariIni;
           
           let rateSekarang = akunHariIni >= 100 ? 900 : (akunHariIni >= 50 ? 800 : (akunHariIni > 0 ? 700 : 0));
-          document.getElementById('dashRpHariIni').innerHTML = "Rp " + data.rpHariIni.toLocaleString('id-ID') + `<br><span style='font-size:12px;color:#aaa'>@ Rp ${rateSekarang}/akun</span>`;
+          document.getElementById('dashRpHariIni').innerHTML = "Rp " + data.rpHariIni.toLocaleString('id-ID') + `<br><span class='text-[11px] text-slate-400 font-normal'>@ Rp ${rateSekarang}/akun</span>`;
           
-          // Total akumulasi mingguan (semua hari di sheet)
           document.getElementById('dashJmlTotal').innerText = data.jmlTotal;
           document.getElementById('dashRpTotal').innerText = "Rp " + data.rpTotal.toLocaleString('id-ID');
           
@@ -273,6 +271,7 @@
       }
     }
 
+    // FUNGSI CEK LIVE & SETOR DENGAN DETAIL HIDUP / MATI
     async function prosesCekDanSetor() {
       let nama = document.getElementById('namaAnggota').value;
       if (nama.trim() === "") return alert("Masukkan Nama Kamu dulu bro!");
@@ -280,26 +279,43 @@
       if (isi.trim() === "") return alert("Isi datanya dulu!");
 
       btn.disabled = true;
-      let barisMentah = isi.split('\n'); let totalAwal = 0;
+      let barisMentah = isi.split('\n'); 
+      let totalAwal = 0;
       
-      logTxt.innerText = "⏳ Mengecek UID ke server FB...";
+      logTxt.innerHTML = `<span class="text-sky-400 font-medium">⏳ Sedang mengecek UID ke server FB...</span>`;
       btn.innerText = "MENGHITUNG STATUS...";
 
-      let hasilCek = await Promise.all(barisMentah.map(async (txt) => {
-        let akun = txt.trim(); if (akun === "") return null;
-        totalAwal++; let uid = ekstrakUID(akun);
-        return (uid && !(await cekStatusLive(uid))) ? null : akun;
+      let akunHidup = [];
+      let akunMati = [];
+
+      await Promise.all(barisMentah.map(async (txt) => {
+        let akun = txt.trim(); 
+        if (akun === "") return;
+        totalAwal++; 
+        let uid = ekstrakUID(akun);
+
+        if (uid && (await cekStatusLive(uid))) {
+          akunHidup.push(akun);
+        } else {
+          akunMati.push(akun);
+        }
       }));
 
-      let akunHidup = hasilCek.filter(item => item !== null);
+      let jmlHidup = akunHidup.length;
+      let jmlMati = akunMati.length;
+
+      // Perbarui textarea hanya dengan akun yang hidup
       area.value = akunHidup.join('\n');
       hitungLive();
 
-      if (akunHidup.length === 0) {
-        logTxt.innerText = `❌ Semua ${totalAwal} akun MATI.`; resetTombolSetor(); return alert("Semua akun CheckPoint!");
+      // Tampilkan status Hidup & Mati di layar secara jelas
+      logTxt.innerHTML = `<span class="text-emerald-400 font-bold">✅ Hidup: ${jmlHidup}</span> | <span class="text-rose-400 font-bold">❌ Mati: ${jmlMati}</span> (Total: ${totalAwal})`;
+
+      if (jmlHidup === 0) {
+        resetTombolSetor(); 
+        return alert(`Semua Akun Mati/Checkpoint!\n\n❌ Akun Mati: ${jmlMati}\n✅ Akun Hidup: 0`);
       }
 
-      logTxt.innerText = `✅ ${akunHidup.length} LIVE. Melanjutkan setor...`;
       btn.innerText = "MENGIRIM KE DATABASE...";
       
       fetch(API_URL, {
@@ -308,9 +324,9 @@
       })
       .then(res => res.json()).then(data => {
         if (data.status === 'sukses') { 
-          alert(`SUCCESS!\nSetor: ${akunHidup.length} Akun`); 
+          alert(`HASIL PEMERIKSAAN:\n✅ Akun Hidup: ${jmlHidup}\n❌ Akun Mati: ${jmlMati}\n\nBerhasil disetor: ${jmlHidup} Akun!`); 
           area.value = ""; 
-          loadDashboard(); // Otomatis refresh data dashboard realtime
+          loadDashboard(); 
         } else { 
           alert("Gagal: " + data.pesan); 
         }
@@ -321,10 +337,8 @@
     function resetTombolSetor() { 
       btn.innerText = "CEK LIVE & SETOR"; 
       btn.disabled = false; 
-      logTxt.innerText = ""; 
     }
 
-    // Jalankan kalkulasi dan muat data dashboard saat halaman pertama kali dibuka
     window.onload = function() {
       hitungLive();
       loadDashboard();
