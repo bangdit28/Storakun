@@ -110,7 +110,7 @@
             <input 
               type="text" 
               id="namaAnggota" 
-              placeholder="Masukkan Nama Kamu (Cth: Abdul)" 
+              placeholder="Masukkan Nama Lengkap Sesuai KTP" 
               class="w-full px-4 py-3 text-sm font-semibold text-center bg-slate-950/60 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition"
               required>
           </div>
@@ -174,13 +174,21 @@
   </div>
 
   <script>
+    // URL API Google Apps Script Terbaru
     const API_URL = "https://script.google.com/macros/s/AKfycbwnYguGJ1UTSElXygFEeUuhF1Vcs-GI8mtLgqKGhve3RrwMGnf0mtlPLoEIo0vn7XU0bA/exec"; 
+    
     let area = document.getElementById('dataAkun');
     let btn = document.getElementById('btnSetor');
+    let inputNama = document.getElementById('namaAnggota');
     let logTxt = document.getElementById('logProses');
     let dataRiwayatGlobal = [];
     let akunHariIni = 0; 
     let totalHargaKirim = 0;
+
+    // Simpan nama otomatis setiap kali diketik/diubah
+    inputNama.addEventListener('input', function() {
+      localStorage.setItem('namaAnggotaSaved', this.value);
+    });
 
     area.addEventListener('input', hitungLive);
 
@@ -271,10 +279,10 @@
       }
     }
 
-    // FUNGSI CEK LIVE & SETOR DENGAN DETAIL HIDUP / MATI
+    // Cek Live & Setor (Dengan Rincian Hidup & Mati)
     async function prosesCekDanSetor() {
-      let nama = document.getElementById('namaAnggota').value;
-      if (nama.trim() === "") return alert("Masukkan Nama Kamu dulu bro!");
+      let nama = inputNama.value;
+      if (nama.trim() === "") return alert("Masukkan Nama Lengkap Sesuai KTP dulu bro!");
       let isi = area.value;
       if (isi.trim() === "") return alert("Isi datanya dulu!");
 
@@ -304,45 +312,11 @@
       let jmlHidup = akunHidup.length;
       let jmlMati = akunMati.length;
 
-      // Perbarui textarea hanya dengan akun yang hidup
       area.value = akunHidup.join('\n');
       hitungLive();
 
-      // Tampilkan status Hidup & Mati di layar secara jelas
       logTxt.innerHTML = `<span class="text-emerald-400 font-bold">✅ Hidup: ${jmlHidup}</span> | <span class="text-rose-400 font-bold">❌ Mati: ${jmlMati}</span> (Total: ${totalAwal})`;
 
       if (jmlHidup === 0) {
         resetTombolSetor(); 
-        return alert(`Semua Akun Mati/Checkpoint!\n\n❌ Akun Mati: ${jmlMati}\n✅ Akun Hidup: 0`);
-      }
-
-      btn.innerText = "MENGIRIM KE DATABASE...";
-      
-      fetch(API_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: "SETOR", nama: nama, bayar: totalHargaKirim, data: area.value })
-      })
-      .then(res => res.json()).then(data => {
-        if (data.status === 'sukses') { 
-          alert(`HASIL PEMERIKSAAN:\n✅ Akun Hidup: ${jmlHidup}\n❌ Akun Mati: ${jmlMati}\n\nBerhasil disetor: ${jmlHidup} Akun!`); 
-          area.value = ""; 
-          loadDashboard(); 
-        } else { 
-          alert("Gagal: " + data.pesan); 
-        }
-        resetTombolSetor();
-      }).catch(err => resetTombolSetor());
-    }
-
-    function resetTombolSetor() { 
-      btn.innerText = "CEK LIVE & SETOR"; 
-      btn.disabled = false; 
-    }
-
-    window.onload = function() {
-      hitungLive();
-      loadDashboard();
-    };
-  </script>
-</body>
-</html>
+        return alert(`Semua Akun Mati/Checkp
