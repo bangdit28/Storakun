@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setor & Live Check Akun FB</title>
+
+  <!-- Tailwind CSS Engine -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #030712;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-100 antialiased py-8 px-4 sm:px-6">
+
+  <div class="max-w-4xl mx-auto space-y-6">
+
+    <!-- Top Navigation / App Bar -->
+    <header class="flex items-center justify-between p-4 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-2xl">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base font-bold text-white tracking-tight">Setor & Live Check Akun FB</h1>
+          <div class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-xs text-slate-400 font-medium">Sistem Aktif</span>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="loadDashboard()" class="inline-flex items-center space-x-2 px-3.5 py-2 text-xs font-semibold rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white border border-emerald-500/30 transition duration-150 shadow-lg shadow-emerald-600/20">
+        <span>🔄 Refresh Data</span>
+      </button>
+    </header>
+
+    <!-- Bento Grid Dashboard Real-Time -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="p-5 rounded-2xl bg-slate-900/50 backdrop-blur-md border border-slate-800/60 flex flex-col justify-between">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Akun Hari Ini</span>
+        <div class="mt-4 flex items-baseline justify-between">
+          <span class="text-2xl lg:text-3xl font-extrabold text-white" id="dashJmlHariIni">0</span>
+          <span class="text-xs text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-md">Live</span>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-slate-900/50 backdrop-blur-md border border-slate-800/60 flex flex-col justify-between">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Cuan Hari Ini</span>
+        <div class="mt-4">
+          <div class="text-xl lg:text-2xl font-extrabold text-emerald-400" id="dashRpHariIni">Rp 0</div>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-slate-900/50 backdrop-blur-md border border-slate-800/60 flex flex-col justify-between">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Akun (Mingguan)</span>
+        <div class="mt-4 flex items-baseline justify-between">
+          <span class="text-2xl lg:text-3xl font-extrabold text-white" id="dashJmlTotal">0</span>
+          <span class="text-xs text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md">Mingguan</span>
+        </div>
+      </div>
+
+      <div class="p-5 rounded-2xl bg-slate-900/50 backdrop-blur-md border border-slate-800/60 flex flex-col justify-between">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Cuan (Mingguan)</span>
+        <div class="mt-4">
+          <div class="text-xl lg:text-2xl font-extrabold text-indigo-300" id="dashRpTotal">Rp 0</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Workspace (Form Input & Kalkulator) -->
+    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Kolom Kiri: Setor & Auto Check -->
+      <div class="lg:col-span-7 p-6 rounded-3xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-2xl space-y-5">
+        <div>
+          <h2 class="text-lg font-bold text-white tracking-tight">📥 Setor & Auto Check Akun Baru</h2>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <input 
+              type="text" 
+              id="namaAnggota" 
+              placeholder="Masukkan Nama Kamu (Cth: Abdul)" 
+              class="w-full px-4 py-3 text-sm font-semibold text-center bg-slate-950/60 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition"
+              required>
+          </div>
+
+          <div>
+            <textarea 
+              id="dataAkun" 
+              placeholder="Paste akun mentahan di sini..." 
+              class="w-full h-44 px-4 py-3 text-xs font-mono bg-slate-950/60 border border-slate-800 rounded-xl text-emerald-400 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition resize-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Status Log -->
+        <div id="logProses" class="text-xs text-center font-mono py-1 text-amber-400 min-h-[20px]"></div>
+
+        <button 
+          id="btnSetor" 
+          onclick="prosesCekDanSetor()" 
+          class="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-bold rounded-xl shadow-lg shadow-indigo-600/25 transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+          CEK LIVE & SETOR
+        </button>
+      </div>
+
+      <!-- Kolom Kanan: Panel Kalkulator & Riwayat -->
+      <div class="lg:col-span-5 space-y-6">
+        
+        <!-- Panel Kalkulator -->
+        <div class="p-6 rounded-3xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-2xl space-y-4">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider">Detail Kalkulasi</h3>
+          
+          <div class="space-y-3 text-xs">
+            <div class="flex justify-between items-center py-2 border-b border-slate-800/80">
+              <span class="text-slate-400">✅ Akun sudah setor hari ini:</span>
+              <b id="infoSudahSetor" class="font-bold text-indigo-400">0 Akun</b>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-slate-800/80">
+              <span class="text-slate-400">📝 Akun di form (Baru):</span>
+              <b id="infoForm" class="font-bold text-amber-400">0 Akun</b>
+            </div>
+            <div class="flex justify-between items-center py-2 border-b border-slate-800/80">
+              <span class="text-slate-400">📈 Akumulasi Total Hari Ini:</span>
+              <b id="infoTotal" class="font-bold text-white">0 Akun</b>
+            </div>
+            <div class="flex justify-between items-center pt-2">
+              <span class="text-slate-400">🏷️ Status Harga (Tier):</span>
+              <b id="infoHarga" class="font-bold text-emerald-400 text-sm">Rp 0</b>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel Riwayat Setoran -->
+        <div class="p-6 rounded-3xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white uppercase tracking-wider">🔄 Riwayat Setoran (Re-Check)</h3>
+          </div>
+
+          <div id="listRiwayat" class="space-y-2.5 max-h-56 overflow-y-auto pr-1 text-xs text-slate-400">
+            Memuat riwayat...
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycby7tO2EvLG_LC_uxCABKoiuKAKejXCDIat2hRGvi6dQhyp6YAytbGBU0SkfqyBRmXH9aQ/exec"; 
+    let area = document.getElementById('dataAkun');
+    let btn = document.getElementById('btnSetor');
+    let logTxt = document.getElementById('logProses');
+    let dataRiwayatGlobal = [];
+    let akunHariIni = 0; 
+    let totalHargaKirim = 0;
+
+    area.addEventListener('input', hitungLive);
+
+    function hitungLive() {
+      let baris = area.value.split('\n');
+      let jmlForm = 0;
+      for(let i=0; i<baris.length; i++) if(baris[i].trim() !== "") jmlForm++;
+      
+      let totalAkumulasi = akunHariIni + jmlForm;
+      let hrgPerAkun = totalAkumulasi >= 100 ? 900 : (totalAkumulasi >= 50 ? 800 : (totalAkumulasi > 0 ? 700 : 0));
+      totalHargaKirim = jmlForm * hrgPerAkun; // Simpan harga buat dikirim ke Database Admin
+      
+      document.getElementById('infoForm').innerText = jmlForm + " Akun";
+      document.getElementById('infoTotal').innerText = totalAkumulasi + " Akun";
+      document.getElementById('infoHarga').innerText = "Rp " + hrgPerAkun.toLocaleString('id-ID') + " / Akun";
+    }
+
+    function loadDashboard() {
+      fetch(API_URL).then(res => res.json()).then(data => {
+        if(data.status === 'sukses') {
+          akunHariIni = data.jmlHariIni || 0; 
+          document.getElementById('dashJmlHariIni').innerText = akunHariIni;
+          let rateSekarang = akunHariIni >= 100 ? 900 : (akunHariIni >= 50 ? 800 : (akunHariIni > 0 ? 700 : 0));
+          document.getElementById('dashRpHariIni').innerHTML = "Rp " + data.rpHariIni.toLocaleString('id-ID') + `<br><span style='font-size:12px;color:#aaa'>@ Rp ${rateSekarang}/akun</span>`;
+          document.getElementById('dashJmlTotal').innerText = data.jmlTotal;
+          document.getElementById('dashRpTotal').innerText = "Rp " + data.rpTotal.toLocaleString('id-ID');
+          document.getElementById('infoSudahSetor').innerText = akunHariIni + " Akun";
+          hitungLive(); 
+          dataRiwayatGlobal = data.riwayat;
+          renderRiwayat(data.riwayat);
+        }
+      });
+    }
+
+    function renderRiwayat(rList) {
+      let html = "";
+      if(!rList || rList.length === 0) return document.getElementById('listRiwayat').innerHTML = "<div class='text-center py-4 text-slate-500'>Belum ada data sebelumnya.</div>";
+      rList.forEach((item, index) => {
+        html += `
+          <div class="flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-slate-800/80">
+            <div>
+              <div class="font-semibold text-slate-200">${item.hari}</div>
+              <div class="text-[11px] text-slate-400">
+                <span class="text-emerald-400 font-medium">${item.jml} Akun</span> | Rp ${item.rp.toLocaleString('id-ID')}
+              </div>
+            </div>
+            <button class="px-2.5 py-1 text-[11px] font-semibold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg transition" id="btnRec_${index}" onclick="reCheckRiwayat(${index})">
+              🔄 Scan Ulang UID
+            </button>
+          </div>`;
+      });
+      document.getElementById('listRiwayat').innerHTML = html;
+    }
+
+    function ekstrakUID(teks) {
+      let m = teks.match(/c_user=(\d+)/); if (m) return m[1];
+      let p = teks.split('|'); if (p.length > 0 && /^\d+$/.test(p[0])) return p[0]; return null;
+    }
+
+    async function cekStatusLive(uid) {
+      try {
+        let res = await fetch(`https://graph.facebook.com/${uid}/picture?type=normal`);
+        if (res.status === 400 || res.status === 404) return false; 
+        if (res.url.includes('static.xx.fbcdn.net') || res.url.includes('rsrc.php') || res.url.includes('silhouette')) return false; 
+        return true;
+      } catch (err) { return false; }
+    }
+
+    async function reCheckRiwayat(index) {
+      let btnRec = document.getElementById(`btnRec_${index}`);
+      let dataHari = dataRiwayatGlobal[index];
+      if(!confirm(`Mau scan ulang ${dataHari.jml} akun di hari ${dataHari.hari}?`)) return;
+      btnRec.innerText = "SCANNING..."; btnRec.disabled = true;
+      let akunMati = [];
+      await Promise.all(dataHari.akun.map(async (item) => {
+        if(!(await cekStatusLive(item.u))) akunMati.push({ r: item.r, c: item.c }); 
+      }));
+      if(akunMati.length > 0) {
+        btnRec.innerText = `Menghapus ${akunMati.length} Mati...`;
+        fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: "HAPUS_MATI", data: akunMati }) })
+        .then(res => res.json()).then(resData => { alert(`Dihapus ${akunMati.length} akun mati.`); loadDashboard(); });
+      } else {
+        alert("Aman Bro! 100% Akun LIVE.");
+        btnRec.innerText = "🔄 Scan Ulang UID"; btnRec.disabled = false;
+      }
+    }
+
+    async function prosesCekDanSetor() {
+      let nama = document.getElementById('namaAnggota').value;
+      if (nama.trim() === "") return alert("Masukkan Nama Kamu dulu bro!");
+      let isi = area.value;
+      if (isi.trim() === "") return alert("Isi datanya dulu!");
+
+      btn.disabled = true;
+      let barisMentah = isi.split('\n'); let totalAwal = 0;
+      
+      logTxt.innerText = "⏳ Mengecek UID ke server FB...";
+      btn.innerText = "MENGHITUNG STATUS...";
+
+      let hasilCek = await Promise.all(barisMentah.map(async (txt) => {
+        let akun = txt.trim(); if (akun === "") return null;
+        totalAwal++; let uid = ekstrakUID(akun);
+        return (uid && !(await cekStatusLive(uid))) ? null : akun;
+      }));
+
+      let akunHidup = hasilCek.filter(item => item !== null);
+      area.value = akunHidup.join('\n');
+      hitungLive(); // Hitung ulang harga yang real setelah yang mati dihapus
+
+      if (akunHidup.length === 0) {
+        logTxt.innerText = `❌ Semua ${totalAwal} akun MATI.`; resetTombolSetor(); return alert("Semua akun CheckPoint!");
+      }
+
+      logTxt.innerText = `✅ ${akunHidup.length} LIVE. Melanjutkan setor...`;
+      btn.innerText = "MENGIRIM KE DATABASE...";
+      
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: "SETOR", nama: nama, bayar: totalHargaKirim, data: area.value })
+      })
+      .then(res => res.json()).then(data => {
+        if (data.status === 'sukses') { alert(`SUCCESS!\nSetor: ${akunHidup.length} Akun`); area.value = ""; loadDashboard(); } 
+        else { alert("Gagal: " + data.pesan); }
+        resetTombolSetor();
+      }).catch(err => resetTombolSetor());
+    }
+
+    function resetTombolSetor() { 
+      btn.innerText = "CEK LIVE & SETOR"; 
+      btn.disabled = false; 
+      logTxt.innerText = ""; 
+    }
+
+    window.onload = loadDashboard;
+  </script>
+</body>
+</html>
