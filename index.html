@@ -319,4 +319,44 @@
 
       if (jmlHidup === 0) {
         resetTombolSetor(); 
-        return alert(`Semua Akun Mati/Checkp
+        return alert(`Semua Akun Mati/Checkpoint!\n\n❌ Akun Mati: ${jmlMati}\n✅ Akun Hidup: 0`);
+      }
+
+      btn.innerText = "MENGIRIM KE DATABASE...";
+      
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: "SETOR", nama: nama, bayar: totalHargaKirim, data: area.value })
+      })
+      .then(res => res.json()).then(data => {
+        if (data.status === 'sukses') { 
+          alert(`HASIL PEMERIKSAAN:\n✅ Akun Hidup: ${jmlHidup}\n❌ Akun Mati: ${jmlMati}\n\nBerhasil disetor: ${jmlHidup} Akun!`); 
+          area.value = ""; 
+          loadDashboard(); 
+        } else { 
+          alert("Gagal: " + data.pesan); 
+        }
+        resetTombolSetor();
+      }).catch(err => resetTombolSetor());
+    }
+
+    function resetTombolSetor() { 
+      btn.innerText = "CEK LIVE & SETOR"; 
+      btn.disabled = false; 
+    }
+
+    // Inisialisasi awal saat halaman dibuka
+    window.onload = function() {
+      // 1. Ambil nama tersimpan jika ada di localStorage
+      let savedName = localStorage.getItem('namaAnggotaSaved');
+      if (savedName) {
+        inputNama.value = savedName;
+      }
+
+      // 2. Jalankan hitung live & dashboard
+      hitungLive();
+      loadDashboard();
+    };
+  </script>
+</body>
+</html>
