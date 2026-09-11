@@ -115,7 +115,7 @@
   </div>
 
   <script>
-    // URL DEPLOY GOOGLE APPS SCRIPT
+    // URL API Google Apps Script Terbaru (Disamakan dengan index.html)
     const API_URL = "https://script.google.com/macros/s/AKfycbwnYguGJ1UTSElXygFEeUuhF1Vcs-GI8mtLgqKGhve3RrwMGnf0mtlPLoEIo0vn7XU0bA/exec"; 
 
     function formatUang(angka) {
@@ -134,14 +134,13 @@
             let htmlRincian = "";
             let rekapData = {};
 
-            if(data.data.length === 0) {
+            if(!data.data || data.data.length === 0) {
               htmlRincian = "<tr><td colspan='6' class='p-6 text-center text-slate-500'>Belum ada data setoran sama sekali.</td></tr>";
               document.getElementById('tabelRekap').innerHTML = "<tr><td colspan='4' class='p-6 text-center text-slate-500'>Kosong</td></tr>";
             } else {
-              // PROSES DATA DARI SPREADSHEET
               data.data.forEach(item => {
                 
-                let namaBesar = item.nama.toUpperCase();
+                let namaBesar = String(item.nama).toUpperCase();
                 if(!rekapData[namaBesar]) {
                   rekapData[namaBesar] = { totalAkun: 0, totalRp: 0, sisaBelumLunas: 0 };
                 }
@@ -156,7 +155,6 @@
                   rekapData[namaBesar].sisaBelumLunas += hargaItem;
                 }
 
-                // Status Badge dengan Tailwind
                 let statusBadge = item.st === "LUNAS" 
                   ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✔ LUNAS</span>` 
                   : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">BELUM LUNAS</span>`;
@@ -177,7 +175,6 @@
                 `;
               });
 
-              // Render HTML buat Rekap Total
               let htmlRekap = "";
               for (let namaAnggota in rekapData) {
                 let info = rekapData[namaAnggota];
@@ -195,6 +192,10 @@
             
             document.getElementById('tabelAdmin').innerHTML = htmlRincian;
           }
+        })
+        .catch(err => {
+          document.getElementById('tabelRekap').innerHTML = '<tr><td colspan="4" class="p-6 text-center text-rose-400">Gagal memuat data. Periksa koneksi.</td></tr>';
+          document.getElementById('tabelAdmin').innerHTML = '<tr><td colspan="6" class="p-6 text-center text-rose-400">Gagal memuat data. Periksa koneksi.</td></tr>';
         });
     }
 
