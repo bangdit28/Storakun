@@ -145,7 +145,7 @@
           </div>
         </div>
 
-        <!-- Log Status: Realtime Hidup & Mati -->
+        <!-- Log Status -->
         <div id="logProses" class="text-xs text-center font-mono py-1 min-h-[22px]"></div>
 
         <button 
@@ -174,7 +174,6 @@
   </div>
 
   <script>
-    // URL API Google Apps Script Terbaru
     const API_URL = "https://script.google.com/macros/s/AKfycbwnYguGJ1UTSElXygFEeUuhF1Vcs-GI8mtLgqKGhve3RrwMGnf0mtlPLoEIo0vn7XU0bA/exec"; 
     
     let area = document.getElementById('dataAkun');
@@ -185,7 +184,6 @@
     let akunHariIni = 0; 
     let totalHargaKirim = 0;
 
-    // Simpan nama otomatis setiap kali diketik/diubah
     inputNama.addEventListener('input', function() {
       localStorage.setItem('namaAnggotaSaved', this.value);
     });
@@ -279,7 +277,6 @@
       }
     }
 
-    // Cek Live & Setor (Dengan Rincian Hidup & Mati)
     async function prosesCekDanSetor() {
       let nama = inputNama.value;
       if (nama.trim() === "") return alert("Masukkan Nama Lengkap Sesuai KTP dulu bro!");
@@ -330,9 +327,13 @@
       })
       .then(res => res.json()).then(data => {
         if (data.status === 'sukses') { 
-          alert(`HASIL PEMERIKSAAN:\n✅ Akun Hidup: ${jmlHidup}\n❌ Akun Mati: ${jmlMati}\n\nBerhasil disetor: ${jmlHidup} Akun!`); 
+          let infoDup = data.duplikat > 0 ? `\n(Dilewati ${data.duplikat} akun DUPLIKAT/sudah pernah disetor)` : "";
+          alert(`HASIL PEMERIKSAAN:\n✅ Berhasil Disetor: ${data.jumlah} Akun!${infoDup}`); 
           area.value = ""; 
           loadDashboard(); 
+        } else if (data.status === 'duplikat') {
+          alert(data.pesan);
+          loadDashboard();
         } else { 
           alert("Gagal: " + data.pesan); 
         }
@@ -345,15 +346,11 @@
       btn.disabled = false; 
     }
 
-    // Inisialisasi awal saat halaman dibuka
     window.onload = function() {
-      // 1. Ambil nama tersimpan jika ada di localStorage
       let savedName = localStorage.getItem('namaAnggotaSaved');
       if (savedName) {
         inputNama.value = savedName;
       }
-
-      // 2. Jalankan hitung live & dashboard
       hitungLive();
       loadDashboard();
     };
