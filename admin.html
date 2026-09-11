@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel - Rekap Gaji</title>
 
-  <!-- Tailwind CSS Engine -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Font Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -41,7 +39,7 @@
 
   <div class="max-w-5xl mx-auto space-y-6">
 
-    <!-- Top Navigation / Header Bar -->
+    <!-- Header Bar -->
     <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-2xl">
       <div class="flex items-center space-x-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-500/25">
@@ -115,32 +113,30 @@
   </div>
 
   <script>
-    // URL API Google Apps Script Terbaru (Disamakan dengan index.html)
     const API_URL = "https://script.google.com/macros/s/AKfycbwnYguGJ1UTSElXygFEeUuhF1Vcs-GI8mtLgqKGhve3RrwMGnf0mtlPLoEIo0vn7XU0bA/exec"; 
 
     function formatUang(angka) {
-      return angka.toLocaleString('id-ID');
+      return Number(angka).toLocaleString('id-ID');
     }
 
     function loadAdmin() {
       document.getElementById('tabelRekap').innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500 font-mono">Mengkalkulasi...</td></tr>';
       document.getElementById('tabelAdmin').innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-500 font-mono">Memuat data real-time...</td></tr>';
       
-      fetch(API_URL + "?admin=1")
+      // Menggunakan anti-cache parameter &_t=
+      fetch(API_URL + "?admin=1&_t=" + new Date().getTime(), { cache: "no-store" })
         .then(res => res.json())
         .then(data => {
           if(data.status === 'sukses') {
-            
             let htmlRincian = "";
             let rekapData = {};
 
             if(!data.data || data.data.length === 0) {
-              htmlRincian = "<tr><td colspan='6' class='p-6 text-center text-slate-500'>Belum ada data setoran sama sekali.</td></tr>";
+              htmlRincian = "<tr><td colspan='6' class='p-6 text-center text-slate-500'>Belum ada data setoran sama sekali di database.</td></tr>";
               document.getElementById('tabelRekap').innerHTML = "<tr><td colspan='4' class='p-6 text-center text-slate-500'>Kosong</td></tr>";
             } else {
               data.data.forEach(item => {
-                
-                let namaBesar = String(item.nama).toUpperCase();
+                let namaBesar = String(item.nama || "Tanpa Nama").toUpperCase();
                 if(!rekapData[namaBesar]) {
                   rekapData[namaBesar] = { totalAkun: 0, totalRp: 0, sisaBelumLunas: 0 };
                 }
@@ -191,11 +187,14 @@
             }
             
             document.getElementById('tabelAdmin').innerHTML = htmlRincian;
+          } else {
+            document.getElementById('tabelRekap').innerHTML = `<tr><td colspan="4" class="p-6 text-center text-rose-400">Error Script: ${data.pesan}</td></tr>`;
+            document.getElementById('tabelAdmin').innerHTML = `<tr><td colspan="6" class="p-6 text-center text-rose-400">Error Script: ${data.pesan}</td></tr>`;
           }
         })
         .catch(err => {
-          document.getElementById('tabelRekap').innerHTML = '<tr><td colspan="4" class="p-6 text-center text-rose-400">Gagal memuat data. Periksa koneksi.</td></tr>';
-          document.getElementById('tabelAdmin').innerHTML = '<tr><td colspan="6" class="p-6 text-center text-rose-400">Gagal memuat data. Periksa koneksi.</td></tr>';
+          document.getElementById('tabelRekap').innerHTML = '<tr><td colspan="4" class="p-6 text-center text-rose-400">Gagal terhubung ke Database. Periksa izin Web App Google Apps Script Anda (pastikan diatur ke Anyone).</td></tr>';
+          document.getElementById('tabelAdmin').innerHTML = '<tr><td colspan="6" class="p-6 text-center text-rose-400">Gagal terhubung ke Database.</td></tr>';
         });
     }
 
